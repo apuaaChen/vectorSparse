@@ -10,10 +10,11 @@ parser.add_argument('--end', type=int, default=1130, help="the ending benchmark 
 parser.add_argument('--dimK', type=int, default=-1, help="the dimension k of the benchmark")
 parser.add_argument('--dimV', type=int, default=1, help="the dimension v of the benchmark")
 parser.add_argument('--dimK_mul', type=int, default=1, help="scare the dimK by a constant factor")
-parser.add_argument('--kernel', choices=['wmma', 'cuda', 'dense', 'sputnik', 'cusparse'], help='select a kernel to profile')
+parser.add_argument('--kernel', choices=['wmma', 'cuda', 'dense', 'sputnik', 'cusparse', 'bell'], help='select a kernel to profile')
 parser.add_argument('--sort', action='store_true', help='sort the csr list')
 parser.add_argument('--func', action='store_true', help='do function verification')
 parser.add_argument('--job', choices=['spmm', 'sddmm'], help='choose the job to launch')
+parser.add_argument('--bm', choices=['rn50', 'transformer'], default='rn50', help='the benchmark to run')
 parser.add_argument('--sddmm_alg', choices=['wmma', 'mma_reg', 'mma_shfl', 'mma_arch'], default='mma_reg',
                     help='the algorithm used for wmmaSddmm')
 parser.add_argument('--precision', choices=['half', 'single'], help='the precesion of the arithmatics')
@@ -30,7 +31,7 @@ for l in k_lines:
     k_dict[layer] = int(dimk)
 
 # collect the benchmark names
-bm_list = open('/raid/datasets/dlmc/rn50_matrices.txt', 'r')
+bm_list = open('/raid/datasets/dlmc/%s_matrices.txt' % args.bm, 'r')
 lines = bm_list.readlines()
 
 # A for loop traverses all the benchmarks within the declared range

@@ -53,23 +53,25 @@ def extract_duration_set(v, kernel, list_, precision, sddmm=False):
         suffix = '_cusparse'
     else:
         suffix = '_dense'
-    
-    suffix_dense = '_dense_sort'
 
-    if args.sort:
-        suffix += '_sort'
-    
+    suffix_dense = '_dense'
+
     suffix += '_%s' % precision
     suffix_dense += '_%s' % precision
+    
+    if args.sort and not sddmm:
+        suffix += '_sort'
+        suffix_dense += '_sort'
 
     if sddmm:
-        suffix += '_sddmm_mma_reg'
-        suffix_dense += '_sddmm_mma_reg'
+        job = 'sddmm'
+    else:
+        job = 'spmm'
 
     for i in np.arange(args.start, args.end):
         benchmark = lines[i][:-6]
-        file_kernel = './csv/dlmc/%s_k%d_v%d.csv' % (benchmark + suffix, args.dimK, v)
-        file_dense = './csv/dlmc/%s_k%d_v%d.csv' % (benchmark + suffix_dense, args.dimK, v)
+        file_kernel = './csv/%s/dlmc/%s_k%d_v%d.csv' % (job, benchmark + suffix, args.dimK, v)
+        file_dense = './csv/%s/dlmc/%s_k%d_v%d.csv' % (job, benchmark + suffix_dense, args.dimK, v)
         # if kernel == 'dense':
         #     print(file_kernel)
         #     print(file_dense)

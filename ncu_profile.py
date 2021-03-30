@@ -7,13 +7,13 @@ import csv
 # Args
 parser = argparse.ArgumentParser(description='profile the SpMM Kernel')
 
-parser.add_argument('--ncu', default='/home/zdchen/projects/Sddmm/target/linux-desktop-glibc_2_11_3-x64/ncu',
+parser.add_argument('--ncu', default='/home/zdchen/projects/vectorSparse/ncu/target/linux-desktop-glibc_2_11_3-x64/ncu',
                             help='Path to nsight compute')
 parser.add_argument('--bm', default='/raid/datasets/dlmc/rn50/random_pruning/0.8/bottleneck_2_block_group3_5_1.smtx',
                             help='Path to benchmark')
 parser.add_argument('--dimK', '-k', type=int, default=256, help='the dimension K of the benchmark')
 parser.add_argument('--dimV', '-v', type=int, default=1, help='the vector length')
-parser.add_argument('--kernel', choices=['wmma', 'cuda', 'dense', 'sputnik', 'cusparse'], help='select a kernel to profile')
+parser.add_argument('--kernel', choices=['wmma', 'cuda', 'dense', 'sputnik', 'cusparse', 'bell'], help='select a kernel to profile')
 parser.add_argument('--sort', action='store_true', help='sort the csr list')
 parser.add_argument('--prof', action='store_true', help='profile the kernel')
 parser.add_argument('--func', action='store_true', help='do functional verification')
@@ -22,6 +22,7 @@ parser.add_argument('--sddmm_alg', choices=['wmma', 'mma_reg', 'mma_shfl', 'mma_
                     help='the algorithm used for wmmaSddmm')
 parser.add_argument('--precision', choices=['half', 'single'], help='the precesion of the arithmatics')
 parser.add_argument('--print', action='store_true', help='print the execution time')
+parser.add_argument('--mem', action='store_true', help='do memory profile')
 
 args = parser.parse_args()
 
@@ -46,16 +47,14 @@ elif args.kernel == 'cusparse':
     ker = 3
     suffix = '_cusparse'
     sparse = 1
+elif args.kernel == 'bell':
+    ker = 0
+    suffix = '_blocked_ell'
+    sparse = 2
 else:
     ker = 0
     suffix = '_dense'
     sparse = 0
-
-if args.sort:
-    suffix += '_sort'
-    sort = 1
-else:
-    sort = 0
 
 # Select the precision
 if args.precision == 'half':
@@ -64,6 +63,12 @@ if args.precision == 'half':
 else:
     mixed = 0
     suffix += '_single'
+
+if args.sort:
+    suffix += '_sort'
+    sort = 1
+else:
+    sort = 0
 
 # If func = 1, the output of the kernel will be compared with the result on host
 if args.func:
@@ -76,7 +81,12 @@ if args.job == 'spmm':
     exe_cmd = './spmm_benchmark %s %d %d %d %d %d %d %d' % (args.bm, args.dimK, args.dimV, ker, sort, func, sparse, mixed)
 
     if args.prof:
-        output_file = './csv/%s_k%d_v%d.csv' % (args.bm.replace('/raid/datasets/', '').replace('.smtx', '') + suffix, args.dimK, args.dimV)
+        if args.mem:
+            output_file = './csv/mem/spmm/%s_k%d_v%d.csv' % (args.bm.replace('/raid/datasets/', '').replace('.smtx', '') + suffix, args.dimK, args.dimV)
+            exe_cmd = '--metrics l1tex__m_xbar2l1tex_read_bytes_mem_lg_op_ld.sum %s' % exe_cmd
+        else:
+            output_file = './csv/spmm/%s_k%d_v%d.csv' % (args.bm.replace('/raid/datasets/', '').replace('.smtx', '') + suffix, args.dimK, args.dimV)
+        
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         cmd = '%s -f --csv --cache-control all --profile-from-start 0 --log-file %s %s' % (args.ncu, output_file, exe_cmd)
     else:
@@ -84,26 +94,25 @@ if args.job == 'spmm':
 
     print(cmd)
     os.system(cmd)
+# Else if the job is SDDMM
 else:
-    suffix += '_sddmm'
     if args.sddmm_alg == 'wmma':
         alg = 0
-        suffix += '_wmma'
     elif args.sddmm_alg == 'mma_reg':
         alg = 1
-        suffix += '_mma_reg'
     elif args.sddmm_alg == 'mma_shfl':
         alg = 2
-        suffix += '_mma_shfl'
     elif args.sddmm_alg == 'mma_arch':
         alg = 3
-        suffix += '_mma_arch'
     else:
         alg = 1
+    
+    if args.kernel == 'wmma':
+        suffix += '_%s' % args.sddmm_alg
     exe_cmd = './sddmm_benchmark %s %d %d %d %d %d %d %d %d' % (args.bm, args.dimK, args.dimV, ker, alg, sort, func, sparse, mixed)
 
     if args.prof:
-        output_file = './csv/%s_k%d_v%d.csv' % (args.bm.replace('/raid/datasets/', '').replace('.smtx', '') + suffix, args.dimK, args.dimV)
+        output_file = './csv/sddmm/%s_k%d_v%d.csv' % (args.bm.replace('/raid/datasets/', '').replace('.smtx', '') + suffix, args.dimK, args.dimV)
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         cmd = '%s -f --csv --cache-control all --profile-from-start 0 --log-file %s %s' % (args.ncu, output_file, exe_cmd)
     else:

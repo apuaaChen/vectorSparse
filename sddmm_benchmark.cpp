@@ -39,6 +39,54 @@ void cusparseSDDMM_(
     float* d_output_value)
 {
     cusparseHandle_t handle;
+    cusparseDnMatDescr_t lhs_dense, rhs_dense;
+    cusparseSpMatDescr_t filter_sparse;
+
+    cusparseCreate(&handle);
+
+    float alpha = 1.0;
+    float beta  = 0.0;
+
+    cusparseCreateDnMat(
+        &lhs_dense, m, k, k, d_lhs_matrix, CUDA_R_32F, CUSPARSE_ORDER_ROW
+    );
+
+    cusparseCreateDnMat(
+        &rhs_dense, k, n, k, d_rhs_matrix, CUDA_R_32F, CUSPARSE_ORDER_COL
+    );
+
+    cusparseCreateCsr(
+        &filter_sparse, m, n, nonzeros, d_row_offsets, d_col_indices, d_output_value,
+        CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F
+    );
+
+    
+    size_t buffer_size;
+    void* dBuffer = NULL;
+    
+    // get buffer
+    cusparseSDDMM_bufferSize(
+        handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+        &alpha, lhs_dense, rhs_dense, &beta, filter_sparse, CUDA_R_32F, 
+        CUSPARSE_SDDMM_ALG_DEFAULT, &buffer_size
+    );
+
+    checkCuda(cudaMalloc(&dBuffer, buffer_size));
+
+    // execute Sddmm
+    cusparseSDDMM(
+        handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+        &alpha, lhs_dense, rhs_dense, &beta, filter_sparse, CUDA_R_32F, CUSPARSE_SDDMM_ALG_DEFAULT,
+        dBuffer
+    );
+
+    checkCuda(cudaFree(dBuffer));
+    cusparseDestroyDnMat(lhs_dense);
+    cusparseDestroyDnMat(rhs_dense);
+    cusparseDestroySpMat(filter_sparse);
+    cusparseDestroy(handle);
+    /*
+    cusparseHandle_t handle;
     cublasHandle_t handle_t;
     cusparseDnMatDescr_t lhs_dense, rhs_dense;
     cusparseSpMatDescr_t filter_sparse;
@@ -98,6 +146,7 @@ void cusparseSDDMM_(
     cusparseDestroySpMat(filter_sparse);
     cusparseDestroy(handle);
     cublasDestroy(handle_t);
+    */
 }
 
 

@@ -74,11 +74,11 @@ __global__ void wmmaSddmmKernel8(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -287,11 +287,11 @@ __global__ void mmaSddmmKernel8reg(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -546,11 +546,11 @@ __global__ void mmaSddmmKernel8shfl(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -808,11 +808,11 @@ __global__ void mmaSddmmKernel8fake(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -1285,11 +1285,11 @@ __global__ void mmaSddmmKernel4reg(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -1529,11 +1529,11 @@ __global__ void mmaSddmmKernel4shfl(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -1770,11 +1770,11 @@ __global__ void mmaSddmmKernel4fake(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -2268,11 +2268,11 @@ __global__ void mmaSddmmKernel2reg(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -2517,11 +2517,11 @@ __global__ void mmaSddmmKernel2shfl(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);
@@ -2773,11 +2773,11 @@ __global__ void mmaSddmmKernel2fake(int m_vec, int k, int n,
     //
 
     int m_index_vec = blockIdx.x;
-    int m_index = m_index_vec * VecLength;
     int n_index = blockIdx.y * Tile_X;
 
     if (m_index_vec >= m_vec) return;
     m_index_vec = __ldg(row_indices + m_index_vec);
+    int m_index = m_index_vec * VecLength;
 
     // Load the row offset and calculate the number of nonzeros in the row
     int row_offset = __ldg(row_offsets + m_index_vec);

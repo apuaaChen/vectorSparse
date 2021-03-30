@@ -41,7 +41,7 @@ fig, ax = plt.subplots(1, 3, figsize=(5, 3))#, tight_layout=True)
 
 l1_miss_sectors_s = [dense_spmm['L1_miss_sector'], sputnik_spmm['L1_miss_sector']]
 l1_miss_sectors_h = [dense_hspmm['L1_miss_sector'], sputnik_hspmm['L1_miss_sector']]
-memory_labels = ['GeMM', 'SpMM']
+memory_labels = ['GEMM', 'SpMM']
 x = np.arange(len(memory_labels)) * 0.5
 width = 0.2
 ax[0].bar(x - width/2, l1_miss_sectors_s, width, label='Single', color='steelblue')

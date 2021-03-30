@@ -16,7 +16,7 @@
 
 
 template <typename InType, typename OutType, typename IndexType, typename DTypeVec, typename ITypeVec, cudaDataType_t DCuSPARSE>
-void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sorted, bool func, bool sparse){
+void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sorted, bool func, int sparse){
 
     // Open the benchmark file
     std::ifstream infile(benchmark, std::ifstream::in);
@@ -68,7 +68,6 @@ void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sort
             for (int i=0; i < m * k; i++){
                 output_value_host[i] = 0.0f;
             }
-            
             
             // traverse all the vector rows
             for (int i=0; i < m_vec; i++){
@@ -246,13 +245,16 @@ void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sort
     // Blocked Ell Algorithm
     else if (sparse == 2){
         // Define the Blocked Ell Size
-        float sparsity = nonzeros / (m * n);
+        float sparsity = (float)nonzeros / (m * n);
         int A_num_rows = m;
         int A_ell_blocksize = vec_length;
         int A_num_col_block = (n + vec_length - 1) / vec_length;
         int A_num_col = A_num_col_block * vec_length;
         int A_num_col_block_nz = A_num_col_block * sparsity + 1;
         int A_ell_cols = A_num_col_block_nz * vec_length;
+
+        printf("A: %d x %d. There are %d nonzero blocks, Each row has %d blocks. Block size is %d x %d\n", 
+                A_num_rows, A_num_col, A_num_col_block_nz * m_vec, A_num_col_block_nz, A_ell_blocksize, A_ell_blocksize);
 
         // Create the matrix A
         int *A_columns = new int[A_num_col_block_nz * m_vec];
@@ -263,11 +265,11 @@ void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sort
 
         // Create the matrix B
         InType* rhs_matrix = new InType[A_num_col * k];
-        MakeDenseMatrix<InType>(rhs_matrix);
+        MakeDenseMatrix<InType>(A_num_col, k, rhs_matrix, generator);
 
         // Device
         int *dA_columns;
-        InType * dA_value, d_rhs_matrix;
+        InType * dA_value, * d_rhs_matrix;
         OutType *d_output_value;
 
         checkCuda(cudaMalloc(&dA_columns, (A_num_col_block_nz * m_vec) * sizeof(int)));
@@ -288,7 +290,7 @@ void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sort
         // Create sparse matrix A in blocked ELL format
         cusparseCreateBlockedEll(
             &lhs_sparse, A_num_rows, A_num_col, A_ell_blocksize,
-            A_ell_cols, dA_columns, dA_values,
+            A_ell_cols, dA_columns, dA_value,
             CUSPARSE_INDEX_32I,
             CUSPARSE_INDEX_BASE_ZERO, DCuSPARSE
         );
@@ -297,18 +299,94 @@ void BmFN(std::string benchmark, int dimK, int vec_length, int kernel, bool sort
         cusparseCreateDnMat(&rhs_dense, A_num_col, k, k, d_rhs_matrix, DCuSPARSE, CUSPARSE_ORDER_ROW);
 
         // Create output dense matrix
-        cusparseCreateDnMat(&output_dense, A_num_rows, k, k, d_output_value, DCuSPARSE, CUSAPRSE_ORDER_ROW);
+        cusparseCreateDnMat(&output_dense, A_num_rows, k, k, d_output_value, DCuSPARSE, CUSPARSE_ORDER_ROW);
 
         InType alpha = 1.0;
         InType beta  = 0.0;
         size_t buffer_size;
         void* dBuffer = NULL;
 
+        cudaProfilerStart();
+        printf("Blocked ELL based SpMM\n");
         // get buffer
         cusparseSpMM_bufferSize(
             handle_ell, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
-            &alpha, lhs_sparse, rhs_dense, &beta, output_dense, DCuSPARSE, CUSPARSE_SPMM_ALG_DEFAULT, &buffer_size
+            &alpha, lhs_sparse, rhs_dense, &beta, output_dense, DCuSPARSE, CUSPARSE_SPMM_BLOCKED_ELL_ALG1, &buffer_size
         );
+
+        checkCuda(cudaMalloc(&dBuffer, buffer_size));
+
+        // Does the computation
+        cusparseSpMM(
+            handle_ell, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+            &alpha, lhs_sparse, rhs_dense, &beta, output_dense, DCuSPARSE, CUSPARSE_SPMM_BLOCKED_ELL_ALG1, dBuffer
+        );
+        cudaProfilerStop();
+
+        // Functional verification
+        if (func){
+            float *output_value_host = new float[A_num_rows * k];
+            // traverse all the vector rows
+            for (int i=0; i < m_vec; i++){
+                // traverse all the rows within the row vector group
+                for (int v=0; v < A_ell_blocksize; v++){
+                    int row_idx = i * A_ell_blocksize + v;
+                    // travers all the output column s
+                    for (int j=0; j < k; j++){
+                        float psum = 0;
+                        // traverse all the column blocks
+                        for (int c=0; c < A_num_col_block_nz; c++){
+                            int col_idx_base = A_columns[i * A_num_col_block_nz + c] * A_ell_blocksize;
+                            // traverse the column block size
+                            for (int cv=0; cv < A_ell_blocksize; cv++){
+                                int col_idx = col_idx_base + cv;
+                                // psum += (float)A_values[row_idx * A_ell_cols + c * A_ell_blocksize + cv] * (float)rhs_matrix[col_idx * k + j];
+                                psum += (float)A_values[row_idx * A_ell_cols + c * A_ell_blocksize + cv] * (float)rhs_matrix[col_idx * k + j];
+                            }
+                        }
+                        output_value_host[row_idx * k + j] = psum;
+                    }
+                }
+            }
+            
+
+            OutType *output_value_cuda = new OutType[A_num_rows * k];
+            checkCuda(cudaMemcpy(output_value_cuda, d_output_value, A_num_rows * k * sizeof(OutType), cudaMemcpyDeviceToHost));
+
+            // Verify the result
+            int errors = 0;
+            for (int j=0; j < A_num_rows * k; j++){
+                // if (j < 256) printf("item %d, expect %.4f, got %.4f\n", j, (float)output_value_host[j], (float)output_value_cuda[j]);
+                if (abs((float)output_value_cuda[j] - (float)output_value_host[j]) > 0.5){
+                    // if (j < 2560) printf("item %d, expect %.4f, got %.4f\n", j, (float)output_value_host[j], (float)output_value_cuda[j]);
+                    errors ++;
+                }
+            }
+            if (errors > 0) {
+                printf( "SPMM Blocked ELL does not agree with SEQUENTIAL! %d errors!\n",errors);
+            }else {
+                printf("Results verified: they agree.\n");
+            }
+            delete output_value_cuda;
+            delete output_value_host;
+
+        }
+        
+
+        checkCuda(cudaFree(dBuffer));
+        cusparseDestroyDnMat(rhs_dense);
+        cusparseDestroyDnMat(output_dense);
+        cusparseDestroySpMat(lhs_sparse);
+        cusparseDestroy(handle_ell);
+        
+        cudaFree(dA_columns);
+        cudaFree(dA_value);
+        cudaFree(d_rhs_matrix);
+        cudaFree(d_output_value);
+
+        delete A_columns;
+        delete A_values;
+        delete rhs_matrix;
 
     }
     // CuBLAS Dense GeMM
@@ -415,6 +493,7 @@ int main(int argc, char **argv){
         printf("            function = 0, the result verification is skipped\n");
         printf("sparse  :   sparse = 0, the dense version is executed as a baseline;\n");
         printf("            sparse = 1, the SpMM is executed;\n");
+        printf("        :   sparse = 2, the Blocked Ell based SpMM is executed");
         printf("mixed   :   mixed = 0, use single precision; \n");
         printf("            mixed = 1, use half precision; \n");
     }

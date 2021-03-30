@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import argparse
 import csv
 import os
+from file_name_server import get_file_name
 
 # Args
 parser = argparse.ArgumentParser(description='plot the acceleration')
@@ -11,10 +12,11 @@ parser.add_argument('--start', type=int, default=0, help='the starting benchmark
 parser.add_argument('--end', type=int, default=1130, help='the ending benchmark to run')
 parser.add_argument('--dimK', type=int, default=-1, help='the dimension k of the benchmark')
 parser.add_argument('--sort', action='store_true', help='sort the csr list')
+parser.add_argument('--bm', choices=['rn50', 'transformer'], default='rn50', help='the benchmark to plot')
 
 args = parser.parse_args()
 
-bm_list = open('/raid/datasets/dlmc/rn50_matrices.txt', 'r')
+bm_list = open('/raid/datasets/dlmc/%s_matrices.txt' % args.bm, 'r')
 lines = bm_list.readlines()
 
 # function that collects the result
@@ -24,7 +26,7 @@ def extract_duration_ncu(file):
             csvreader = csv.reader(csvfile)
 
             unit = 'unknown'
-
+            dur_accumulate = 0
             for row in csvreader:
                 if len(row) >= 3 and "Duration" in row[-4]:
                     unit = row[-3]
@@ -38,12 +40,11 @@ def extract_duration_ncu(file):
                             dur /= 1e+6
                         else:
                             print('unknown unit')
-                        return dur
+                        dur_accumulate += dur
                     except:
                         print(file)
                         return -1.0
-                    
-            print("cannot find duration")
+            return dur_accumulate
     else:
         print('file %s does not exist' % file)
 
@@ -62,8 +63,10 @@ def extract_duration_set(v, kernel, list_):
         
     for i in np.arange(args.start, args.end):
         benchmark = lines[i][:-6]
-        file_kernel = './csv/dlmc/%s_k%d_v%d.csv' % (benchmark + suffix, args.dimK, v)
-        file_dense = './csv/dlmc/%s_k%d_v%d.csv' % (benchmark + suffix_dense, args.dimK, v)
+        file_kernel = get_file_name('/raid/datasets/dlmc/%s' % benchmark, args.dimK, v, kernel, True, 'spmm', 'None', 'half', False)
+        file_dense = get_file_name('/raid/datasets/dlmc/%s' % benchmark, args.dimK, v, 'dense', True, 'spmm', 'None', 'half', False)
+        # file_kernel = './csv/dlmc/%s_k%d_v%d.csv' % (benchmark + suffix, args.dimK, v)
+        # file_dense = './csv/dlmc/%s_k%d_v%d.csv' % (benchmark + suffix_dense, args.dimK, v)
         dur_kernel = extract_duration_ncu(file_kernel)
         dur_dense = extract_duration_ncu(file_dense)
         if dur_kernel > 0:
@@ -81,33 +84,40 @@ def extract_duration_set(v, kernel, list_):
             elif('0.9' in benchmark):
                 list_[3].append(dur_kernel)
             else:
-                print("undefined sparsity")
+                # print("undefined sparsity")
+                continue
 
 
 # dense_v1 = [[], [], [], [], [], []]
 cuda_v1 = [[], [], [], [], [], []]
-extract_duration_set(1, 'cuda', cuda_v1)
+extract_duration_set(1, 'sputnik', cuda_v1)
 
 # dense_v2 = [[], [], [], [], [], []]
 cuda_v2 = [[], [], [], [], [], []]
 wmma_v2 = [[], [], [], [], [], []]
+bell_v2 = [[], [], [], [], [], []]
 
 extract_duration_set(2, 'cuda', cuda_v2)
 extract_duration_set(2, 'wmma', wmma_v2)
+extract_duration_set(2, 'bell', bell_v2)
 
 # dense_v4 = [[], [], [], [], [], []]
 cuda_v4 = [[], [], [], [], [], []]
 wmma_v4 = [[], [], [], [], [], []]
+bell_v4 = [[], [], [], [], [], []]
 
 extract_duration_set(4, 'cuda', cuda_v4)
 extract_duration_set(4, 'wmma', wmma_v4)
+extract_duration_set(4, 'bell', bell_v4)
 
 # dense_v8 = [[], [], [], [], [], []]
 cuda_v8 = [[], [], [], [], [], []]
 wmma_v8 = [[], [], [], [], [], []]
+bell_v8 = [[], [], [], [], [], []]
 
 extract_duration_set(8, 'cuda', cuda_v8)
 extract_duration_set(8, 'wmma', wmma_v8)
+extract_duration_set(8, 'bell', bell_v8)
 
 def plot(ax, color, bias, data, label='nn'):
     return ax.boxplot(data, positions=[1 + bias, 2 + bias, 3 + bias, 4 + bias, 5 + bias, 6 + bias], notch=True, patch_artist=True,
@@ -116,7 +126,7 @@ def plot(ax, color, bias, data, label='nn'):
         whiskerprops=dict(color=color),
         flierprops=dict(color=color, markeredgecolor=color),
         medianprops=dict(color='black'),
-        widths=0.35)
+        widths=0.25)
 
 
 fig, axs = plt.subplots(2, 2)
@@ -132,18 +142,20 @@ axs[0, 0].set_title('V=1')
 
 axs[0, 1].plot([0.5, 7],[1, 1], color='purple')
 c2_p = plot(axs[0, 1], 'steelblue', 0, cuda_v2, 'cuda')
-w2_p = plot(axs[0, 1], 'lightcoral', 0.5, wmma_v2, 'wmma')
+b2_p = plot(axs[0, 1], 'forestgreen', 0.3, bell_v2, 'blocked_ell')
+w2_p = plot(axs[0, 1], 'lightcoral', 0.6, wmma_v2, 'wmma')
 
-axs[0, 1].legend([c2_p["boxes"][0], w2_p["boxes"][0]], ['cuda', 'mma'], loc='upper left')
+axs[0, 1].legend([c2_p["boxes"][0], b2_p["boxes"][0], w2_p["boxes"][0]], ['cuda', 'blocked ell', 'mma'], loc='upper left')
 axs[0, 1].set_xticks([1, 2, 3, 4, 5, 6])
 axs[0, 1].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
 axs[0, 1].set_title('V=2')
 
 axs[1, 0].plot([0.5, 7],[1, 1], color='purple')
 c4_p = plot(axs[1, 0], 'steelblue', 0, cuda_v4, 'cuda')
-w4_p = plot(axs[1, 0], 'lightcoral', 0.5, wmma_v4, 'wmma')
+b4_p = plot(axs[1, 0], 'forestgreen', 0.3, bell_v4, 'blocked_ell')
+w4_p = plot(axs[1, 0], 'lightcoral', 0.6, wmma_v4, 'wmma')
 
-axs[1, 0].legend([c4_p["boxes"][0], w4_p["boxes"][0]], ['cuda', 'mma'], loc='upper left')
+axs[1, 0].legend([c4_p["boxes"][0], b4_p["boxes"][0], w4_p["boxes"][0]], ['cuda', 'blocked ell', 'mma'], loc='upper left')
 axs[1, 0].set_xticks([1, 2, 3, 4, 5, 6])
 axs[1, 0].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
 axs[1, 0].set_xlabel('Sparsity')
@@ -152,13 +164,14 @@ axs[1, 0].set_title('V=4')
 
 axs[1, 1].plot([0.5, 7],[1, 1], color='purple')
 c8_p =plot(axs[1, 1], 'steelblue', 0, cuda_v8, 'cuda')
-w8_p = plot(axs[1, 1], 'lightcoral', 0.5, wmma_v8, 'wmma')
+b8_p = plot(axs[1, 1], 'forestgreen', 0.3, bell_v8, 'blocked_ell')
+w8_p = plot(axs[1, 1], 'lightcoral', 0.6, wmma_v8, 'wmma')
 
-axs[1, 1].legend([c8_p["boxes"][0], w8_p["boxes"][0]], ['cuda', 'mma'], loc='upper left')
+axs[1, 1].legend([c8_p["boxes"][0], b8_p["boxes"][0], w8_p["boxes"][0]], ['cuda', 'blocked ell', 'mma'], loc='upper left')
 axs[1, 1].set_xticks([1, 2, 3, 4, 5, 6])
 axs[1, 1].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
 axs[1, 1].set_xlabel('Sparsity')
 axs[1, 1].set_title('V=8')
 
 plt.subplots_adjust(hspace=0.3)
-fig.savefig('./spmm_speedup.pdf', bbox_inches='tight')
+fig.savefig('./spmm_speedup_%s.pdf' % args.bm, bbox_inches='tight')

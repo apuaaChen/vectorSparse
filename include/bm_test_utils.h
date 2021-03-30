@@ -58,7 +58,7 @@ void GenerateUniformBlockedELLIndex(int num_block_col,
         std::random_shuffle(indices.begin(), indices.end());
         int offset = 0;
         for (int c = 0; c < num_block_col; c++){
-            if (indices[i] < num_block_nnz_col){
+            if (indices[c] < num_block_nnz_col){
                 ellColInd_r[offset] = c;
                 offset ++;
             }
