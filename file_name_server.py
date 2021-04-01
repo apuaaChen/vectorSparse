@@ -1,4 +1,6 @@
 import string
+import os
+import csv
 
 
 def get_file_name(bm, dimK, dimV, kernel, sort, job, sddmm_alg, precision, mem):
@@ -41,3 +43,41 @@ def get_file_name(bm, dimK, dimV, kernel, sort, job, sddmm_alg, precision, mem):
             output_file = './csv/sddmm/%s_k%d_v%d.csv' % (bm.replace('/raid/datasets/', '').replace('.smtx', '') + suffix, dimK, dimV)
     
     return output_file
+
+
+def get_bm_size(bm, dimK, dimV):
+    with open("/raid/datasets/dlmc/%s.smtx" % bm) as bm_file:
+        lines = bm_file.readlines()
+        # Get the problem size
+        [m, n, nnz] = list(map(int, lines[0].split(', ')))
+        # return dimK * dimV * nnz
+        return dimK * dimV * m * n
+
+# function that collects the result
+def extract_duration_ncu(file):
+    if os.path.exists(file):
+        with open(file, 'r') as csvfile:
+            csvreader = csv.reader(csvfile)
+
+            unit = 'unknown'
+            dur_accumulate = 0
+            for row in csvreader:
+                if len(row) >= 3 and "Duration" in row[-4]:
+                    unit = row[-3]
+                    try:
+                        dur = float(row[-2])
+                        if unit == 'second':
+                            dur *= 1000
+                        elif unit == 'usecond':
+                            dur /= 1000
+                        elif unit == 'nsecond':
+                            dur /= 1e+6
+                        else:
+                            print('unknown unit')
+                        dur_accumulate += dur
+                    except:
+                        print(file)
+                        return -1.0
+            return dur_accumulate
+    else:
+        print('file %s does not exist' % file)
