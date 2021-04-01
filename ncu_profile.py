@@ -7,7 +7,7 @@ import csv
 # Args
 parser = argparse.ArgumentParser(description='profile the SpMM Kernel')
 
-parser.add_argument('--ncu', default='/home/zdchen/projects/vectorSparse/ncu/target/linux-desktop-glibc_2_11_3-x64/ncu',
+parser.add_argument('--ncu', default=os.environ.get('NCU_PATH'),
                             help='Path to nsight compute')
 parser.add_argument('--bm', default='/raid/datasets/dlmc/rn50/random_pruning/0.8/bottleneck_2_block_group3_5_1.smtx',
                             help='Path to benchmark')
