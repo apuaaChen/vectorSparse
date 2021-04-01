@@ -25,7 +25,7 @@ RUN make -j12
 
 ENV CUDA_INSTALL_PATH=/usr/local/cuda-11.2
 ENV PATH=$CUDA_INSTALL_PATH/bin:$PATH
-ENV LD_LIBRARY_PATH= projects/sputnik/build/sputnik/
+ENV LD_LIBRARY_PATH=projects/sputnik/build/sputnik/
 
 # install Python3.8
 RUN apt-get install software-properties-common
