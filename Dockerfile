@@ -2,7 +2,7 @@ FROM nvidia/cuda:11.2.2-devel-ubuntu18.04
 
 MAINTAINER zdchen <chenzd15thu@ucsb.edu>
 
-RUN mkdir projects && cd project
+RUN mkdir projects && cd projects
 
 # Install Git
 RUN apt-get update && apt-get install git
