@@ -16,9 +16,9 @@ RUN apt-get update && apt-get install -y cmake
 
 # Build sputnik
 RUN git clone https://github.com/google-research/sputnik.git
-WORKDIR projects/sputnik
+WORKDIR sputnik
 RUN mkdir build
-WORKDIR projects/sputnik/build
+WORKDIR build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DCUDA_ARCHS="70"
 RUN make -j12
 
