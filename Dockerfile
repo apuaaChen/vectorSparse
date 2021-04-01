@@ -2,7 +2,8 @@ FROM nvidia/cuda:11.2.2-devel-ubuntu18.04
 
 MAINTAINER zdchen <chenzd15thu@ucsb.edu>
 
-RUN mkdir projects && cd projects
+RUN mkdir projects
+WORKDIR projects
 
 # Install Sputnik Dependencies
 RUN apt-get -y update --fix-missing
@@ -15,8 +16,9 @@ RUN apt-get update && apt-get install -y cmake
 
 # Build sputnik
 RUN git clone https://github.com/google-research/sputnik.git
-RUN cd sputnik
-RUN mkdir build && cd build
+WORKDIR projects/sputnik
+RUN mkdir build
+WORKDIR projects/sputnik/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DCUDA_ARCHS="70"
 RUN make -j12
 
