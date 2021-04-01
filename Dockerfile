@@ -4,12 +4,9 @@ MAINTAINER zdchen <chenzd15thu@ucsb.edu>
 
 RUN mkdir projects && cd projects
 
-# Install Git
-RUN apt-get update && apt-get install git
-
 # Install Sputnik Dependencies
 RUN apt-get -y update --fix-missing
-RUN apt-get install -y emacs wget libgoogle-glog-dev
+RUN apt-get install -y git emacs wget libgoogle-glog-dev
 RUN apt-get install -y software-properties-common
 RUN apt-get update
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
