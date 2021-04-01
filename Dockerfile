@@ -37,4 +37,4 @@ RUN pip3 install numpy
 RUN pip3 install matplotlib
 
 # install nsight compute
-RUN apt-get install nsight-compute
+RUN apt-get -y install nsight-compute
