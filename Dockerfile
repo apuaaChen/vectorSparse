@@ -30,11 +30,7 @@ ENV LD_LIBRARY_PATH=projects/sputnik/build/sputnik/
 RUN apt-get install software-properties-common
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get update
-RUN apt-get install python3.8
-
-# install pip3
-RUN apt-get update
-RUN apt-get -y install python3-pip
+RUN apt-get -y install python3.8 python3-pip
 
 # install python libraries
 RUN pip3 install numpy
