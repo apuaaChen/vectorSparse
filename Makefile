@@ -1,5 +1,5 @@
 NVCC = /usr/local/cuda-11.2/bin/nvcc
-NVCC_FLAGS = -std=c++11 -arch=sm_70 -lineinfo -lcublas -lcusparse -I/home/zdchen/projects/sputnik/
+NVCC_FLAGS = -std=c++11 -arch=sm_70 -lineinfo -lcublas -lcusparse -I${SPUTNIK_PATH}
 
 
 ##################################################################
@@ -16,7 +16,7 @@ OBJ_DIR = bin
 INC_DIR = include
 
 # Library directory
-LIB_DIR = /home/zdchen/projects/sputnik/build/sputnik
+LIB_DIR = ${SPUTNIK_PATH}/build/sputnik
 
 ##################################################################
 

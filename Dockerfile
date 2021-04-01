@@ -39,3 +39,7 @@ RUN pip3 install matplotlib
 # install nsight compute
 RUN apt-get update -y
 RUN apt-get -y install nsight-compute-2020.3.1
+
+WORKDIR /
+
+ENV SPUTNIK_PATH=/projects/sputnik
