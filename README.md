@@ -11,10 +11,11 @@ docker build -t vectorsparse .
 ```
 To launch the container
 ```shell
-docker run -it --gpus all --name <your_container_name> -d -v <host_dataset_dir>:/raid/dataset -v <host_dir>/vectorSparse:/projects/vectorSparse vectorsparse
+docker run -it --gpus all --name <your_container_name> -v <host_dataset_dir>:/raid/dataset -v <host_dir>/vectorSparse:/projects/vectorSparse vectorsparse
 ```
 Then, compile the source code with
 ```shell
+cd vectorSparse
 bash setup.sh
 ```
 To obtain the results in Figure 17, run
