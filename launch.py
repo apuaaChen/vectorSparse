@@ -4,7 +4,7 @@ import argparse
 # Args
 parser = argparse.ArgumentParser(description='launch the experiments')
 
-parser.add_argument('--exp', choices['sddmm', 'spmm', 'reuse', 'bell'], help='the experiment to run')
+parser.add_argument('--exp', choices=['sddmm', 'spmm', 'reuse', 'bell'], help='the experiment to run')
 
 args = parser.parse_args()
 
