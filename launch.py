@@ -9,7 +9,7 @@ parser.add_argument('--exp', choices['sddmm', 'spmm', 'reuse', 'bell'], help='th
 args = parser.parse_args()
 
 if args.exp == 'spmm':
-    for k in [64, 128, 256, 512]:
+    for k in [64, 128, 256]:
         cmd = 'python3 job_launcher.py --start 0 --end 323 --dimK %d --dimV 1 --kernel dense --job spmm --sort --precision half' % k
         os.system(cmd)
 
@@ -30,9 +30,13 @@ if args.exp == 'spmm':
 
             cmd = 'python3 job_launcher.py --start 0 --end 323 --dimK %d --dimV %d --kernel bell --job spmm --sort --precision half' % (k, v)
             os.system(cmd)
+    
+    # plot
+    cmd = 'python3 plot_spmm.py --start 0 --end 323 --dimK 256 --sort --bm rn50 --combo'
+    os.system(cmd)
 
 elif args.exp == 'sddmm':
-    for k in [64, 128, 256, 512]:
+    for k in [64, 128, 256]:
         cmd = 'python3 job_launcher.py --start 0 --end 323 --dimK %d --dimV 1 --kernel dense --sort --job sddmm --precision half' % k
         os.system(cmd)
 
@@ -59,6 +63,11 @@ elif args.exp == 'sddmm':
 
             cmd = 'python3 job_launcher.py --start 0 --end 323 --dimK %d --dimV %d --kernel wmma --sort --job sddmm --sddmm_alg mma_arch --precision half' % (k, v)
             os.system(cmd)
+    
+    # plot
+    cmd = 'python3 plot_sddmm.py --start 0 --end 323 --dimK 256 --sort --bm rn50 --combo'
+    os.system(cmd)
+
 elif args.exp == 'reuse':
     for sparse in ['0.5', '0.7', '0.8', '0.9', '0.95', '0.98']:
         cmd = 'python3 ncu_profile.py --bm /raid/datasets/dlmc/rn50/magnitude_pruning/0.5/bottleneck_projection_block_group_projection_block_group4.smtx -k 256 -v 2 --kernel bell --prof --job spmm --precision half --mem'
