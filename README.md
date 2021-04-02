@@ -36,3 +36,15 @@ Step 6.2: To obtain the results in Figure 18, run
 python3 launch.py --exp sddmm
 ```
 The result will be shown in sddmm_speedup_rn50_combo.pdf
+
+***
+
+The DLMC dataset and sputnik library are from this paper
+```
+@inproceedings{sgk_sc2020,
+  author    = {Trevor Gale and Matei Zaharia and Cliff Young and Erich Elsen},
+  title     = {Sparse {GPU} Kernels for Deep Learning},
+  booktitle = {Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis, {SC} 2020},
+  year      = {2020},
+}
+```
