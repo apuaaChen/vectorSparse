@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import argparse
 import csv
 import os
-from file_name_server import get_file_name, extract_duration_ncu
+from file_name_server import get_file_name, extract_duration_ncu, geometric_mean
 import matplotlib.ticker as ticker
 
 # Args
@@ -60,6 +60,8 @@ def extract_duration_set(v, k, kernel, list_):
                 # print("undefined sparsity")
                 continue
 
+geo_rows = []
+
 if args.combo:
     Ks = [64, 128, 256]
 else:
@@ -100,6 +102,9 @@ for idx, k in enumerate(Ks):
     extract_duration_set(8, k, 'bell', bell_v8)
 
     def plot(ax, color, bias, data, label='nn'):
+        geo_mean = geometric_mean(data)
+        geo_rows.append([label] + geo_mean)
+        ax.plot([1, 2, 3, 4, 5, 6], geo_mean, color=color)
         return ax.boxplot(data, positions=[1 + bias, 2 + bias, 3 + bias, 4 + bias, 5 + bias, 6 + bias], notch=True, patch_artist=True,
             boxprops=dict(facecolor=color),
             capprops=dict(color=color),
@@ -164,3 +169,8 @@ if args.combo:
     fig.savefig('./spmm_speedup_%s_combo.pdf' % (args.bm), bbox_inches='tight')
 else:
     fig.savefig('./spmm_speedup_%s_k%d.pdf' % (args.bm, args.dimK), bbox_inches='tight')
+
+with open('./spmm_geo.csv', 'w') as outfile:
+    writer = csv.writer(outfile)
+    for r in geo_rows:
+        writer.writerow(r)

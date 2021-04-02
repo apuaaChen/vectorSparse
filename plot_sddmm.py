@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import argparse
 import csv
 import os
-from file_name_server import get_file_name, extract_duration_ncu
+from file_name_server import get_file_name, extract_duration_ncu, geometric_mean
 
 # Args
 parser = argparse.ArgumentParser(description='plot the acceleration')
@@ -44,6 +44,8 @@ def extract_duration_set(v, k, kernel, list_, alg):
             else:
                 # print("undefined sparsity")
                 continue
+
+geo_rows = []
 
 if args.combo:
     Ks = [64, 128, 256]
@@ -97,6 +99,9 @@ for idx, k in enumerate(Ks):
     extract_duration_set(8, k, 'wmma', mma_arch_v8, 'mma_arch')
 
     def plot(ax, color, bias, data, label='nn'):
+        geo_mean = geometric_mean(data)
+        geo_rows.append([label] + geo_mean)
+        ax.plot([1, 2, 3, 4, 5, 6], geo_mean, color=color)
         return ax.boxplot(data, positions=[1 + bias, 2 + bias, 3 + bias, 4 + bias, 5 + bias, 6 + bias], notch=True, patch_artist=True,
             boxprops=dict(facecolor=color),
             capprops=dict(color=color),
@@ -104,10 +109,7 @@ for idx, k in enumerate(Ks):
             flierprops=dict(color=color, markeredgecolor=color),
             medianprops=dict(color='black'),
             widths=0.1)
-
-
-
-
+            
     axs[0, idx].grid(True)
     axs[1, idx].grid(True)
     axs[2, idx].grid(True)
@@ -127,7 +129,7 @@ for idx, k in enumerate(Ks):
     w2_p = plot(axs[1, idx], 'lightcoral', 0.2, wmma_v2, 'wmma')
     w2_reg_p = plot(axs[1, idx], 'forestgreen', 0.4, mma_reg_v2, 'mma (reg)')
     w2_shfl_p = plot(axs[1, idx], 'mediumslateblue', 0.6, mma_shfl_v2, 'mma (shfl)')
-    w2_arch_p = plot(axs[1, idx], 'darkcyan', 0.8, mma_arch_v2, 'mma (arch)')
+    w2_arch_p = plot(axs[1, idx], 'orange', 0.8, mma_arch_v2, 'mma (arch)')
 
     # axs[0, 1].legend([c2_p["boxes"][0], w2_p["boxes"][0], w2_reg_p["boxes"][0], w2_shfl_p["boxes"][0], w2_arch_p["boxes"][0]], ['cuda', 'wmma', 'mma (reg)', 'mma (shfl)', 'mma (arch)'], loc='upper left', ncol=2)
     axs[1, idx].set_xticks([1, 2, 3, 4, 5, 6])
@@ -139,7 +141,7 @@ for idx, k in enumerate(Ks):
     w4_p = plot(axs[2, idx], 'lightcoral', 0.2, wmma_v4, 'wmma')
     w4_reg_p = plot(axs[2, idx], 'forestgreen', 0.4, mma_reg_v4, 'mma (reg)')
     w4_shfl_p = plot(axs[2, idx], 'mediumslateblue', 0.6, mma_shfl_v4, 'mma (shfl)')
-    w4_arch_p = plot(axs[2, idx], 'darkcyan', 0.8, mma_arch_v4, 'mma (arch)')
+    w4_arch_p = plot(axs[2, idx], 'orange', 0.8, mma_arch_v4, 'mma (arch)')
 
     # axs[1, 0].legend([c4_p["boxes"][0], w4_p["boxes"][0], w4_reg_p["boxes"][0], w4_shfl_p["boxes"][0], w4_arch_p["boxes"][0]], ['cuda', 'wmma', 'mma (reg)', 'mma (shfl)', 'mma (arch)'], loc='upper left')
     axs[2, idx].set_xticks([1, 2, 3, 4, 5, 6])
@@ -154,7 +156,7 @@ for idx, k in enumerate(Ks):
     w8_p = plot(axs[3, idx], 'lightcoral', 0.2, wmma_v8, 'wmma')
     w8_reg_p = plot(axs[3, idx], 'forestgreen', 0.4, mma_reg_v8, 'mma (reg)')
     w8_shfl_p = plot(axs[3, idx], 'mediumslateblue', 0.6, mma_shfl_v8, 'mma (shfl)')
-    w8_arch_p = plot(axs[3, idx], 'darkcyan', 0.8, mma_arch_v8, 'mma (arch)')
+    w8_arch_p = plot(axs[3, idx], 'orange', 0.8, mma_arch_v8, 'mma (arch)')
 
     if idx == 0: axs[0, 1].legend([c8_p["boxes"][0], w8_p["boxes"][0], w8_reg_p["boxes"][0], w8_shfl_p["boxes"][0], w8_arch_p["boxes"][0]], ['cuda', 'wmma', 'mma (reg)', 'mma (shfl)', 'mma (arch)'], loc='upper left', ncol=5, bbox_to_anchor = (-0.5,0.5,1,1))
     axs[3, idx].set_xticks([1, 2, 3, 4, 5, 6])
@@ -173,3 +175,8 @@ if args.combo:
     fig.savefig('./sddmm_speedup_%s_combo.pdf' % (args.bm), bbox_inches='tight')
 else:
     fig.savefig('./sddmm_speedup_%s_k%d.pdf' % (args.bm, args.dimK), bbox_inches='tight')
+
+with open('./sddmm_geo.csv', 'w') as outfile:
+    writer = csv.writer(outfile)
+    for r in geo_rows:
+        writer.writerow(r)

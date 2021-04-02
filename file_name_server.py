@@ -81,3 +81,14 @@ def extract_duration_ncu(file):
             return dur_accumulate
     else:
         print('file %s does not exist' % file)
+
+
+def geometric_mean(list_in):
+    geo_mean = []
+    for sub_list in list_in:
+        mean = 1.
+        for s in sub_list:
+            mean *= s
+        geo_mean.append(pow(mean, 1./len(sub_list)))
+    
+    return geo_mean

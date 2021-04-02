@@ -37,7 +37,7 @@ sputnik_hspmm = {
     'iadd3_inst': 262700,
 }
 
-fig, ax = plt.subplots(1, 3, figsize=(5, 3))#, tight_layout=True)
+fig, ax = plt.subplots(1, 3, figsize=(5, 2))#, tight_layout=True)
 
 l1_miss_sectors_s = [dense_spmm['L1_miss_sector'], sputnik_spmm['L1_miss_sector']]
 l1_miss_sectors_h = [dense_hspmm['L1_miss_sector'], sputnik_hspmm['L1_miss_sector']]
@@ -56,7 +56,7 @@ pipeline_s = [dense_spmm['fma_pipe_util'], sputnik_spmm['fma_pipe_util']]
 pipeline_h = [dense_hspmm['tensor_pipe_util'], sputnik_hspmm['fma_pipe_util']]
 ax[1].bar(x - width/2, pipeline_s, width, label='Single', color='steelblue')
 ax[1].bar(x + width/2, pipeline_h, width, label='Half', color='lightcoral')
-ax[1].set_ylabel('Max Compute Pipe Utilization (%)')
+ax[1].set_ylabel('Max Compute Pipe \n Utilization (%)')
 ax[1].set_xticks(x)
 ax[1].set_xticklabels(memory_labels)
 ax[1].legend(ncol=2, bbox_to_anchor = (0,0.2,1,1), loc = 'upper center')
@@ -76,5 +76,5 @@ ax[2].set_xticks(x)
 ax[2].set_xticklabels(memory_labels)
 # ax[2].legend()
 # ax[2].grid(True)
-plt.subplots_adjust(wspace=0.6)
+plt.subplots_adjust(wspace=0.75)
 fig.savefig('./mmspmm.pdf', bbox_inches='tight')
