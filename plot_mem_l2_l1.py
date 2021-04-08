@@ -38,7 +38,7 @@ for idx, v in enumerate([2, 4, 8]):
         output_file = get_file_name(bm, 256, v, 'wmma', True, 'spmm', 'blank', 'half', True)
         mmas[idx].append(extract_mem_ncu(output_file))
 
-fig, ax = plt.subplots(1, 3, figsize=(8, 3))
+fig, ax = plt.subplots(1, 3, figsize=(8, 2))
 
 labels = ['0.5', '0.7', '0.8', '0.9', '0.95', '0.98']
 x = np.arange(len(labels))

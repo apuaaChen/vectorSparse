@@ -76,7 +76,7 @@ def extract_duration_ncu(file):
                             print('unknown unit')
                         dur_accumulate += dur
                     except:
-                        print(file)
+                        # print(file)
                         return -1.0
             return dur_accumulate
     else:

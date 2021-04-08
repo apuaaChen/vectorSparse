@@ -110,6 +110,7 @@ def plot(ax, color, bias, data, label='nn'):
         medianprops=dict(color='black'),
         widths=0.35)
 
+"""
 fig, axs = plt.subplots(2, 2, figsize=(6.5, 4.5))
 
 axs[0, 0].plot([0.5, 6.5],[1, 1], color='purple')
@@ -157,5 +158,57 @@ fig.add_subplot(111, frame_on=False)
 plt.tick_params(labelcolor="none", bottom=False, left=False)
 plt.ylabel("Speedup over cuBLASHgemm")
 plt.xlabel("Sparsity")
+
+fig.savefig('./blocked_ell_speedup.pdf', bbox_inches='tight')
+"""
+
+fig, axs = plt.subplots(1, 3, figsize=(7, 2.5))
+
+"""
+axs[0].plot([0.5, 6.5],[1, 1], color='purple')
+ell2_p = plot(axs[0], 'steelblue', 0, ell_v2, 'sputnik')
+# axs[0, 0].legend([sf_p["boxes"][0], cf_p["boxes"][0]], [''], loc='upper left')
+axs[0].set_xticks([1, 2, 3, 4, 5, 6])
+axs[0].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
+axs[0].set_title('Block-Size=2')
+# axs[0, 0].set_ylabel('Speedup over cublasHgemm')
+"""
+
+axs[0].plot([0.5, 6.5],[1, 1], color='purple')
+ell4_p = plot(axs[0], 'steelblue', 0, ell_v4, 'sputnik')
+# axs[0, 1].legend([sh_p["boxes"][0], ch_p["boxes"][0]], ['sputnik', 'cusparse'], loc='upper left')
+axs[0].set_xticks([1, 2, 3, 4, 5, 6])
+axs[0].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
+axs[0].set_title('Block-Size=4')
+# axs[0, 1].set_ylabel('Speedup over cublasHgemm')
+
+
+axs[1].plot([0.5, 6.5],[1, 1], color='purple')
+ell8_p = plot(axs[1], 'steelblue', 0, ell_v8, 'sputnik')
+# df_d = plot(axs[1, 0], 'purple', 0.5, dense_single, 'dense')
+# axs[1, 0].legend([sf_d["boxes"][0], cf_d["boxes"][0]], ['sputnik', 'cusparse'], loc='upper left')
+axs[1].set_xticks([1, 2, 3, 4, 5, 6])
+axs[1].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
+axs[1].set_title('Block-Size=8')
+# axs[1, 0].set_xlabel('Sparsity')
+# axs[1, 0].set_ylabel('Speedup over cublasHgemm')
+
+
+axs[2].plot([0.5, 6.5],[1, 1], color='purple')
+ell16_p = plot(axs[2], 'steelblue', 0, ell_v16, 'sputnik')
+# dh_d = plot(axs[1, 1], 'purple', 0.5, dense_half, 'dense')
+# axs[1, 1].legend([sh_d["boxes"][0]], ['sputnik'], loc='upper left')
+axs[2].set_xticks([1, 2, 3, 4, 5, 6])
+axs[2].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
+axs[2].set_title('Block-Size=16')
+# axs[1, 1].set_xlabel('Sparsity')
+# axs[1, 1].set_ylabel('Speedup over cublasHgemm')
+
+plt.subplots_adjust(wspace=0.15)
+
+fig.add_subplot(111, frame_on=False)
+plt.tick_params(labelcolor="none", bottom=False, left=False)
+plt.ylabel("Speedup over cuBLASHgemm", fontsize=11)
+plt.xlabel("Sparsity", fontsize=11)
 
 fig.savefig('./blocked_ell_speedup.pdf', bbox_inches='tight')

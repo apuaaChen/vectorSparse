@@ -119,7 +119,7 @@ for idx, k in enumerate(Ks):
 
     axs[0, 0 + 2 * idx].set_xticks([1, 2, 3, 4, 5, 6])
     axs[0, 0 + 2 * idx].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
-    axs[0, 0 + 2 * idx].legend([c1_p["boxes"][0]], ['cuda'], loc='upper left')
+    axs[0, 0 + 2 * idx].legend([c1_p["boxes"][0]], ['fpu'], loc='upper left')
     # axs[0, 0 + 2 * idx].set_ylabel('Speedup over cublasHgemm')
     axs[0, 0 + 2 * idx].set_title('V=1, N=%d' % k)
     axs[0, 0 + 2 * idx].yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
@@ -129,7 +129,7 @@ for idx, k in enumerate(Ks):
     b2_p = plot(axs[0, 1 + 2 * idx], 'forestgreen', 0.3, bell_v2, 'blocked_ell')
     w2_p = plot(axs[0, 1 + 2 * idx], 'lightcoral', 0.6, wmma_v2, 'wmma')
 
-    axs[0, 1 + 2 * idx].legend([c2_p["boxes"][0], b2_p["boxes"][0], w2_p["boxes"][0]], ['cuda', 'blocked-ELL', 'mma'], loc='upper left')
+    axs[0, 1 + 2 * idx].legend([c2_p["boxes"][0], b2_p["boxes"][0], w2_p["boxes"][0]], ['fpu', 'blocked-ELL', 'mma'], loc='upper left')
     axs[0, 1 + 2 * idx].set_xticks([1, 2, 3, 4, 5, 6])
     axs[0, 1 + 2 * idx].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
     axs[0, 1 + 2 * idx].set_title('V=2, N=%d' % k)
@@ -139,7 +139,7 @@ for idx, k in enumerate(Ks):
     b4_p = plot(axs[1, 0 + 2 * idx], 'forestgreen', 0.3, bell_v4, 'blocked_ell')
     w4_p = plot(axs[1, 0 + 2 * idx], 'lightcoral', 0.6, wmma_v4, 'wmma')
 
-    axs[1, 0 + 2 * idx].legend([c4_p["boxes"][0], b4_p["boxes"][0], w4_p["boxes"][0]], ['cuda', 'blocked-ELL', 'mma'], loc='upper left')
+    axs[1, 0 + 2 * idx].legend([c4_p["boxes"][0], b4_p["boxes"][0], w4_p["boxes"][0]], ['fpu', 'blocked-ELL', 'mma'], loc='upper left')
     axs[1, 0 + 2 * idx].set_xticks([1, 2, 3, 4, 5, 6])
     axs[1, 0 + 2 * idx].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
     # axs[1, 0 + 2 * idx].set_xlabel('Sparsity')
@@ -151,7 +151,7 @@ for idx, k in enumerate(Ks):
     b8_p = plot(axs[1, 1 + 2 * idx], 'forestgreen', 0.3, bell_v8, 'blocked_ell')
     w8_p = plot(axs[1, 1 + 2 * idx], 'lightcoral', 0.6, wmma_v8, 'wmma')
 
-    axs[1, 1 + 2 * idx].legend([c8_p["boxes"][0], b8_p["boxes"][0], w8_p["boxes"][0]], ['cuda', 'blocked-ELL', 'mma'], loc='upper left')
+    axs[1, 1 + 2 * idx].legend([c8_p["boxes"][0], b8_p["boxes"][0], w8_p["boxes"][0]], ['fpu', 'blocked-ELL', 'mma'], loc='upper left')
     axs[1, 1 + 2 * idx].set_xticks([1, 2, 3, 4, 5, 6])
     axs[1, 1 + 2 * idx].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
     # axs[1, 1 + 2 * idx].set_xlabel('Sparsity')

@@ -158,7 +158,7 @@ for idx, k in enumerate(Ks):
     w8_shfl_p = plot(axs[3, idx], 'mediumslateblue', 0.6, mma_shfl_v8, 'mma (shfl)')
     w8_arch_p = plot(axs[3, idx], 'orange', 0.8, mma_arch_v8, 'mma (arch)')
 
-    if idx == 0: axs[0, 1].legend([c8_p["boxes"][0], w8_p["boxes"][0], w8_reg_p["boxes"][0], w8_shfl_p["boxes"][0], w8_arch_p["boxes"][0]], ['cuda', 'wmma', 'mma (reg)', 'mma (shfl)', 'mma (arch)'], loc='upper left', ncol=5, bbox_to_anchor = (-0.5,0.5,1,1))
+    if idx == 0: axs[0, 1].legend([c8_p["boxes"][0], w8_p["boxes"][0], w8_reg_p["boxes"][0], w8_shfl_p["boxes"][0], w8_arch_p["boxes"][0]], ['fpu', 'wmma', 'mma (reg)', 'mma (shfl)', 'mma (arch)'], loc='upper left', ncol=5, bbox_to_anchor = (-0.5,0.5,1,1))
     axs[3, idx].set_xticks([1, 2, 3, 4, 5, 6])
     axs[3, idx].set_xticklabels([0.5, 0.7, 0.8, 0.9, 0.95, 0.98])
     # axs[1, 1].set_xlabel('Sparsity')
