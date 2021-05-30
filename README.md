@@ -48,3 +48,5 @@ The DLMC dataset and sputnik library are from this paper
   year      = {2020},
 }
 ```
+***
+We demonstrate how to use our kernels in Sparse Transformer with fixed mask in [here](https://github.com/apuaaChen/sparse_transformer_sc21).
