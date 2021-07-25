@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/351565020.svg)](https://zenodo.org/badge/latestdoi/351565020)
 #### Grant access to GPU performance counter
 We obtain the kernel duration with [NVIDIA Nsight Compute](https://developer.nvidia.com/nsight-compute). Profiling with Nsight Compute requires access to the performance counters on the GPU ([Permission issue with Performance Counters](https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-performance-counters)). This should be configured on the machine outside of the container.
 
