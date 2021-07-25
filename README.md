@@ -1,3 +1,26 @@
+#### Grant access to GPU performance counter
+We obtain the kernel duration with [NVIDIA Nsight Compute](https://developer.nvidia.com/nsight-compute). Profiling with Nsight Compute requires access to the performance counters on the GPU ([Permission issue with Performance Counters](https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-performance-counters)). This should be configured on the machine outside of the container.
+
+To check if the performance is accessible, run
+```shell
+cat /proc/driver/nvidia/params | grep RmProfilingAdminOnly
+```
+You should see
+```shell
+RmProfilingAdminOnly: 0
+```
+Otherwise, the access can be granted with the following steps:
+1. Create .conf file (e.g. profile.conf) in folder /etc/modprobe.d
+2. Open file /etc/modprobe.d/profile.conf in any editor
+3. Add below line in profile.conf
+   ```
+   options nvidia “NVreg_RestrictProfilingToAdminUsers=0”
+   ```
+4. Close file /etc/modprobe.d/profile.conf
+5. Restart your machine
+
+For more information, please see [nvprof-warning-the-user-does-not-have-permission-to-profile-on-the-target-device](https://forums.developer.nvidia.com/t/nvprof-warning-the-user-does-not-have-permission-to-profile-on-the-target-device/72374/8) and [Permission issue with Performance Counters](https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-performance-counters).
+
 #### Using Docker
 
 Step 1: Get the source code
