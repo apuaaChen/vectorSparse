@@ -52,7 +52,7 @@ Step 6.1: To obtain the results in Figure 17, run
 ```shell
 python3 launch.py --exp spmm
 ```
-The result will be shown in spmm_speedup_rn50_combo.pdf
+This script will launch all the experiments sequentially. For each experiment, the profiling result is stored in a `.csv` file under the `./csv` directory. We present an example csv file in the `./example`. When all the experiments are done, another python script will be lauched to fetch the kernel durations in the csv files, and summarize the results as a figure in `spmm_speedup_rn50_combo.pdf`.
 
 Step 6.2: To obtain the results in Figure 18, run
 ```shell
